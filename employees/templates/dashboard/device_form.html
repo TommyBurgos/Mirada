@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Nuevo Dispositivo{% endblock %}
+
+{% block content %}
+<h2>➕ Nuevo Dispositivo</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div>
+        <label>Nombre del dispositivo</label><br>
+        <input type="text" name="name" required>
+    </div>
+
+    <br>
+    <button type="submit">Guardar</button>
+    <a href="/employees/dashboard/devices/">Cancelar</a>
+</form>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Nuevo Empleado{% endblock %}
+
+{% block content %}
+<h2>➕ Nuevo Empleado</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div>
+        <label>Nombres</label><br>
+        <input type="text" name="first_name" required>
+    </div>
+
+    <div>
+        <label>Apellidos</label><br>
+        <input type="text" name="last_name" required>
+    </div>
+
+    <div>
+        <label>Documento</label><br>
+        <input type="text" name="document_number">
+    </div>
+
+    <br>
+    <button type="submit">Guardar</button>
+    <a href="/dashboard/employees/">Cancelar</a>
+</form>
+{% endblock %}

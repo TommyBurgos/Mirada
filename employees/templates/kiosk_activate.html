@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Activar Kiosko</h2>
+
+  <input id="code" placeholder="Código de dispositivo">
+  <button onclick="activate()">Activar</button>
+
+  <p id="result"></p>
+
+<script>
+function activate(){
+    const formData = new FormData();
+    formData.append("code", document.getElementById("code").value);
+
+    fetch("/employees/activate-kiosk/", {
+    method: "POST",
+    body: formData
+})
+.then(r => r.json())
+.then(data => {
+    if(data.success){
+        window.location.href = data.redirect;
+    }else{
+        alert(data.message);
+    }
+});
+
+}
+</script>
+</body>
+</html>

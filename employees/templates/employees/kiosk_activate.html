@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activar Kiosko</title>
+</head>
+<body>
+    <h2>Ingresar código del dispositivo</h2>
+
+    <input type="text" id="code" placeholder="Código del kiosko">
+    <button onclick="activate()">Activar</button>
+
+    <p id="msg"></p>
+
+<script>
+function activate(){
+    const code = document.getElementById("code").value;
+
+    fetch("/employees/activate-kiosk/", {
+        method: "POST",
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: "code=" + code
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success){
+            // Redirige al kiosko de cámara
+            window.location.href = "/employees/kiosk-camera/";
+        } else {
+            document.getElementById("msg").innerText = data.error;
+        }
+    });
+}
+</script>
+</body>
+</html>

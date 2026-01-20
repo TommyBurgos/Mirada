@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Kiosko de Asistencia</title>
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        video {
+            margin-top: 20px;
+            border-radius: 12px;
+        }
+        .box {
+            margin-top: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1 id="status">Colóquese frente a la cámara</h1>
+
+<video id="video" width="400" height="300" autoplay></video>
+
+<div class="box" id="confirmBox" style="display:none;">
+    <h2 id="personName">¿Eres Juan Pérez?</h2>
+    <button onclick="confirmAttendance()">✅ Confirmar</button>
+    <button onclick="resetKiosk()">❌ No soy yo</button>
+</div>
+
+<script>
+const video = document.getElementById('video');
+const statusText = document.getElementById('status');
+const confirmBox = document.getElementById('confirmBox');
+
+// Activar cámara
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+        video.srcObject = stream;
+    });
+
+// Simulación de detección (luego será IA real)
+setTimeout(() => {
+    statusText.innerText = "Rostro detectado";
+    confirmBox.style.display = "block";
+}, 3000);
+
+function confirmAttendance() {
+    statusText.innerText = "✔️ Asistencia registrada";
+    confirmBox.style.display = "none";
+
+    setTimeout(resetKiosk, 3000);
+}
+
+function resetKiosk() {
+    statusText.innerText = "Colóquese frente a la cámara";
+    confirmBox.style.display = "none";
+}
+</script>
+
+</body>
+</html>

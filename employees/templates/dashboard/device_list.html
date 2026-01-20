@@ -1,0 +1,42 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Dispositivos{% endblock %}
+
+{% block content %}
+<h2>📱 Dispositivos / Kioskos</h2>
+
+<div style="margin-bottom:15px;">
+    <a href="/employees/dashboard/devices/new/">➕ Nuevo dispositivo</a>
+</div>
+
+<table width="100%" cellpadding="10" cellspacing="0" style="background:white; border-radius:8px;">
+    <thead style="background:#eee;">
+        <tr>
+            <th>Nombre</th>
+            <th>Identifier</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in devices %}
+        <tr>
+            <td>{{ d.name }}</td>
+            <td><code>{{ d.identifier }}</code></td>
+            <td>
+                {% if d.is_active %}
+                    🟢 Activo
+                {% else %}
+                    🔴 Inactivo
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" style="text-align:center;">
+                No hay dispositivos registrados
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

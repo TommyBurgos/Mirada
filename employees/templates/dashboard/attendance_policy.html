@@ -1,0 +1,29 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Horario de Asistencia{% endblock %}
+
+{% block content %}
+<h2>⏰ Configuración de Horario</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div>
+        <label>Hora de entrada</label><br>
+        <input type="time" name="entry_time" value="{{ policy.entry_time }}">
+    </div>
+
+    <div>
+        <label>Hora de salida</label><br>
+        <input type="time" name="exit_time" value="{{ policy.exit_time }}">
+    </div>
+
+    <div>
+        <label>Minutos de tolerancia</label><br>
+        <input type="number" name="grace_minutes" value="{{ policy.grace_minutes }}" min="0">
+    </div>
+
+    <br>
+    <button type="submit">Guardar cambios</button>
+</form>
+{% endblock %}

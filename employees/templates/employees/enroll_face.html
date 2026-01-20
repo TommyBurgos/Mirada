@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Enrolar rostro</title>
+<style>
+  body { font-family: Arial; text-align: center; }
+  video, canvas { border-radius: 12px; }
+  button { padding: 12px 24px; font-size: 16px; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Enrolar rostro: {{ employee.first_name }} {{ employee.last_name }}</h1>
+
+<video id="video" width="400" height="300" autoplay></video>
+<canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+
+<br>
+<button onclick="capture()">📸 Capturar</button>
+<p id="msg"></p>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const msg = document.getElementById('msg');
+
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => video.srcObject = stream);
+
+function capture() {
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  canvas.toBlob(blob => {
+    const formData = new FormData();
+    formData.append('image', blob, 'face.jpg');
+
+    fetch('{% url "upload_face" employee.id %}', {
+      method: 'POST',
+      body: formData
+    })
+    .then(r => r.json())
+    .then(() => msg.innerText = '✔️ Foto guardada')
+    .catch(() => msg.innerText = '❌ Error');
+  }, 'image/jpeg');
+}
+</script>
+
+</body>
+</html>

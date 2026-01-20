@@ -1,0 +1,147 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Asistencias{% endblock %}
+
+{% block content %}
+<h2>🕒 Asistencias</h2>
+
+<form id="filterForm" class="row g-2 mb-4" method="get">
+
+    <!-- Fechas -->
+    <div class="col-md-2">
+        <input type="date" name="start" class="form-control" required
+               value="{{ request.GET.start }}">
+    </div>
+
+    <div class="col-md-2">
+        <input type="date" name="end" class="form-control" required
+               value="{{ request.GET.end }}">
+    </div>
+
+    <!-- Empleado -->
+    <div class="col-md-2">
+        <select name="employee" class="form-control">
+            <option value="">Empleado</option>
+            {% for e in employees %}
+                <option value="{{ e.id }}"
+                    {% if request.GET.employee == e.id|stringformat:"s" %}selected{% endif %}>
+                    {{ e }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Estado -->
+    <div class="col-md-2">
+        <select name="status" class="form-control">
+            <option value="">Estado</option>
+            <option value="on_time" {% if request.GET.status == "on_time" %}selected{% endif %}>
+                A tiempo
+            </option>
+            <option value="late" {% if request.GET.status == "late" %}selected{% endif %}>
+                Atraso
+            </option>
+        </select>
+    </div>
+
+    <!-- Dispositivo -->
+    <div class="col-md-2">
+        <select name="device" class="form-control">
+            <option value="">Dispositivo</option>
+            {% for d in devices %}
+                <option value="{{ d.id }}"
+                    {% if request.GET.device == d.id|stringformat:"s" %}selected{% endif %}>
+                    {{ d.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Formato -->
+    <div class="col-md-2">
+        <select name="format" class="form-control">
+            <option value="csv">CSV</option>
+            <option value="excel">Excel</option>
+        </select>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="col-md-12 mt-2 d-flex gap-2">
+        <button type="submit"
+                class="btn btn-primary"
+                onclick="setFilterAction()">
+            🔍 Filtrar
+        </button>
+
+        <button type="submit"
+                class="btn btn-success"
+                onclick="setExportAction()">
+            ⬇️ Exportar
+        </button>
+    </div>
+</form>
+
+<script>
+function setFilterAction() {
+    document.getElementById("filterForm").action = "";
+}
+
+function setExportAction() {
+    document.getElementById("filterForm").action = "/dashboard/attendance/export/";
+}
+</script>
+
+
+
+
+<table border="0" cellpadding="10" cellspacing="0" width="100%" style="background:white; border-radius:8px;">
+    <thead style="background:#eee;">
+        <tr>
+            <th>Empleado</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Dispositivo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for att in attendances %}
+        <tr>
+            <td>{{ att.employee }}</td>
+            <td>{{ att.timestamp|date:"d/m/Y" }}</td>
+            <td>{{ att.timestamp|time:"H:i" }}</td>
+            <td>
+                {% if att.attendance_type == "in" %}
+                    🟢 Entrada
+                {% else %}
+                    🔴 Salida
+                {% endif %}
+            </td>
+            <td>
+                {% if att.status == "late" %}
+                    ⏰ Atraso
+                    {% if att.delay_minutes %}
+                        ({{ att.delay_minutes }} min)
+                    {% endif %}
+                {% elif att.status == "on_time" %}
+                    ✅ A tiempo
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            <td>
+                {{ att.device.name|default:"—" }}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" style="text-align:center;">
+                No hay asistencias registradas
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

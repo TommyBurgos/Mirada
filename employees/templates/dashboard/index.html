@@ -1,0 +1,135 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<h3 class="mb-4">📊 Dashboard — {{ today }}</h3>
+
+<!-- MÉTRICAS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card card-metric p-3 text-center">
+            <h2>{{ total_employees }}</h2>
+            <small class="text-muted">Empleados</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-metric p-3 text-center">
+            <h2 class="text-success">{{ entries_today }}</h2>
+            <small class="text-muted">Entradas hoy</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-metric p-3 text-center">
+            <h2 class="text-danger">{{ exits_today }}</h2>
+            <small class="text-muted">Salidas hoy</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-metric p-3 text-center">
+            <h2 class="text-warning">{{ late_today }}</h2>
+            <small class="text-muted">Atrasos</small>
+        </div>
+    </div>
+</div>
+
+<!-- GRÁFICOS -->
+<div class="row g-4">
+
+    <div class="col-md-12">
+        <h5>📈 Entradas últimos 7 días</h5>
+        <canvas id="attendanceChart" height="120"></canvas>
+    </div>
+
+    <div class="col-md-6">
+        <h5>⏱️ Puntualidad (%)</h5>
+        <canvas id="punctualityChart" height="120"></canvas>
+    </div>
+
+    <div class="col-md-6">
+        <h5>🏆 Empleados con más atrasos</h5>
+        <canvas id="lateEmployeesChart" height="120"></canvas>
+    </div>
+
+    <div class="col-md-4">
+        <h5>⚖️ Entradas vs Salidas</h5>
+        <canvas id="inOutChart" height="200"></canvas>
+    </div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Entradas últimos 7 días
+new Chart(attendanceChart, {
+    type: 'bar',
+    data: {
+        labels: {{ chart_days|safe }},
+        datasets: [
+            {
+                label: 'Entradas',
+                data: {{ chart_entries|safe }},
+                backgroundColor: '#198754'
+            },
+            {
+                label: 'Atrasos',
+                data: {{ chart_lates|safe }},
+                backgroundColor: '#fd7e14'
+            }
+        ]
+    }
+});
+
+// Puntualidad
+new Chart(punctualityChart, {
+    type: 'line',
+    data: {
+        labels: {{ chart_days|safe }},
+        datasets: [{
+            label: 'Puntualidad %',
+            data: {{ chart_punctuality|safe }},
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13,110,253,0.15)',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        scales: {
+            y: { min: 0, max: 100 }
+        }
+    }
+});
+
+// Top atrasos
+new Chart(lateEmployeesChart, {
+    type: 'bar',
+    data: {
+        labels: {{ chart_late_employee_labels|safe }},
+        datasets: [{
+            label: 'Atrasos',
+            data: {{ chart_late_employee_totals|safe }},
+            backgroundColor: '#dc3545'
+        }]
+    },
+    options: {
+        indexAxis: 'y'
+    }
+});
+
+// Entradas vs salidas
+new Chart(inOutChart, {
+    type: 'doughnut',
+    data: {
+        labels: ['Entradas', 'Salidas'],
+        datasets: [{
+            data: [{{ chart_today_entries }}, {{ chart_today_exits }}],
+            backgroundColor: ['#198754', '#dc3545']
+        }]
+    }
+});
+</script>
+
+{% endblock %}

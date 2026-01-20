@@ -1,0 +1,54 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Empleados{% endblock %}
+
+{% block content %}
+<h2>👥 Empleados</h2>
+
+<div style="margin-bottom:15px;">
+    <a href="/employees/dashboard/employees/new/">➕ Nuevo empleado</a>
+</div>
+
+<table width="100%" cellpadding="10" cellspacing="0" style="background:white; border-radius:8px;">
+    <thead style="background:#eee;">
+        <tr>
+            <th>Nombre</th>
+            <th>Documento</th>
+            <th>Estado</th>
+            <th>Rostro</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for emp in employees %}
+        <tr>
+            <td>{{ emp.first_name }} {{ emp.last_name }}</td>
+            <td>{{ emp.document_number|default:"—" }}</td>
+            <td>
+                {% if emp.is_active %}
+                    🟢 Activo
+                {% else %}
+                    🔴 Inactivo
+                {% endif %}
+            </td>
+            <td>
+                {% if emp.faces.exists %}
+                    ✅ Enrolado
+                {% else %}
+                    ❌ Sin enrolar
+                {% endif %}
+            </td>
+            <td>
+                <a href="/employees/{{ emp.id }}/enroll-face/">📷 Enrolar</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" style="text-align:center;">
+                No hay empleados registrados
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

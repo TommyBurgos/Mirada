@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kiosko de Asistencia</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial;
+            background: #111;
+            color: white;
+        }
+        video {
+            border: 4px solid #00c853;
+            border-radius: 10px;
+            width: 480px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 22px;
+        }
+        #confirmBox {
+            margin-top: 15px;
+        }
+        button {
+            padding: 8px 14px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Kiosko de Registro</h2>
+    <video id="video" autoplay></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <div id="result">Esperando rostro...</div>
+
+    <!-- 🔹 NUEVO: Caja de confirmación -->
+    <div id="confirmBox" style="display:none;">
+        <div style="font-weight:bold;" id="confirmName"></div>
+        <div style="margin:6px 0;">
+            ¿Confirmar <span id="confirmType"></span>?
+        </div>
+
+        <button id="btnConfirm">Confirmar</button>
+        <button id="btnCancel" style="margin-left:8px;">Cancelar</button>
+    </div>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const resultDiv = document.getElementById('result');
+
+// 🔹 NUEVO: control de estado
+let pendingId = null;
+let scanningPaused = false;
+
+// Abrir cámara
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+    video.srcObject = stream;
+})
+.catch(err => {
+    resultDiv.innerText = "No se pudo abrir la cámara";
+});
+
+// Capturar frame cada 2 segundos
+setInterval(() => {
+    captureAndSend();
+}, 2000);
+
+function captureAndSend() {
+    // 🔹 NUEVO: pausar escaneo mientras espera confirmación
+    if (scanningPaused) return;
+
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+
+    canvas.toBlob(blob => {
+        const formData = new FormData();
+        formData.append('image', blob, 'frame.jpg');
+
+        fetch('/employees/recognize-face/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("RESPUESTA BACKEND:", data);
+
+            if (data.error) {
+                resultDiv.innerHTML = "Buscando rostro...";
+                resultDiv.style.color = "#ffffff";
+                return;
+            }
+
+            if (data.recognized === true) {
+
+            // 🛑 NUEVO: caso bloqueado (ya marcó todo hoy)
+            if (data.blocked === true) {
+                resultDiv.innerHTML =
+                    "⚠️ <b>" + data.employee_name + "</b><br>" +
+                    (data.message || "Asistencia ya completada");
+                resultDiv.style.color = "#ffc107";
+
+                // reanudar escaneo después de un momento
+                setTimeout(() => {
+                    scanningPaused = false;
+                }, 2000);
+
+                return;
+            }
+
+            // Caso normal (requiere confirmación)
+            resultDiv.innerHTML = "✅ Bienvenido <br><b>" + data.employee_name + "</b>";
+            resultDiv.style.color = "#00e676";
+
+            showConfirmBox(
+                data.employee_name,
+                data.suggested_type,
+                data.pending_id
+            );
+            return;
+        }
+
+
+            resultDiv.innerHTML = "❌ " + (data.message || "Rostro no registrado");
+            resultDiv.style.color = "#ff5252";
+        })
+        .catch(err => {
+            console.log("ERROR FETCH:", err);
+            resultDiv.innerText = "Error de conexión";
+        });
+
+    }, 'image/jpeg');
+}
+
+// ================================
+// 🔹 NUEVAS FUNCIONES
+// ================================
+
+function showConfirmBox(name, type, pid) {
+    pendingId = pid;
+    scanningPaused = true;
+
+    document.getElementById("confirmName").textContent = name;
+    document.getElementById("confirmType").textContent =
+        type === "in" ? "ENTRADA" : "SALIDA";
+
+    document.getElementById("confirmBox").style.display = "block";
+}
+
+function hideConfirmBox() {
+    pendingId = null;
+    document.getElementById("confirmBox").style.display = "none";
+}
+
+async function confirmAttendance() {
+    if (!pendingId) return;
+
+    const res = await fetch("/employees/confirm-attendance/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pending_id: pendingId })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        let msg = "🕒 <b>" + data.attendance_type.toUpperCase() + "</b>";
+
+        if (data.status === "late") {
+            msg += "<br>⏰ Atraso";
+            if (data.delay_minutes !== null) {
+                msg += " (" + data.delay_minutes + " min)";
+            }
+            resultDiv.style.color = "#ff9800";
+        } else {
+            msg += "<br>✅ A tiempo";
+            resultDiv.style.color = "#00c853";
+        }
+
+        resultDiv.innerHTML = msg;
+    }
+    else {
+            resultDiv.innerHTML = "❌ Error al registrar asistencia";
+            resultDiv.style.color = "#ff5252";
+        }
+
+    hideConfirmBox();
+
+    // pequeño delay antes de reanudar escaneo
+    setTimeout(() => {
+        scanningPaused = false;
+    }, 1200);
+}
+
+function cancelAttendance() {
+    hideConfirmBox();
+    scanningPaused = false;
+}
+
+document.getElementById("btnConfirm").addEventListener("click", confirmAttendance);
+document.getElementById("btnCancel").addEventListener("click", cancelAttendance);
+</script>
+
+</body>
+</html>
