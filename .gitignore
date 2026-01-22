@@ -17,3 +17,5 @@ staticfiles/
 # IDEs
 .vscode/
 .idea/
+
+staticfiles/
