@@ -12,12 +12,18 @@ USERNAME = "admin"
 EMAIL = "admin@mirada.local"
 PASSWORD = "admin1234"
 
-if not User.objects.filter(username=USERNAME).exists():
-    User.objects.create_superuser(
-        username=USERNAME,
-        email=EMAIL,
-        password=PASSWORD
-    )
-    print("✅ Superusuario creado")
-else:
-    print("ℹ️ Superusuario ya existe")
+user, created = User.objects.get_or_create(
+    username=USERNAME,
+    defaults={
+        "email": EMAIL,
+        "is_staff": True,
+        "is_superuser": True,
+    }
+)
+
+user.set_password(PASSWORD)
+user.is_staff = True
+user.is_superuser = True
+user.save()
+
+print("✅ Superusuario listo / contraseña reseteada")
