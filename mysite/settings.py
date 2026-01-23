@@ -181,4 +181,4 @@ AWS_DEFAULT_ACL = None
 
 MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
 
-print("🔥 DATABASE_URL =", os.getenv("DATABASE_URL"))
+#print("🔥 DATABASE_URL =", os.getenv("DATABASE_URL"))
