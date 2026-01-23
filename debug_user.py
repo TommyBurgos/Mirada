@@ -17,6 +17,8 @@ try:
     print("is_staff:", user.is_staff)
     print("is_superuser:", user.is_superuser)
     print("is_active:", user.is_active)
+    print("usuario:",user.username)
+    print("usuario:",user.password)
 
     user_check = authenticate(username="admin", password="admin1234")
     print("🔐 authenticate() devuelve:", user_check)
