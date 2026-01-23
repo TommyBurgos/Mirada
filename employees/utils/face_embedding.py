@@ -8,19 +8,9 @@ _app = None  # singleton en memoria
 def get_face_app():
     global _app
     if _app is None:
-        #_app = FaceAnalysis(name="buffalo_l",providers=["CPUExecutionProvider"]  # 🔴 FORZAMOS CPU
-        #)
-        #_app.prepare(ctx_id=0, det_size=(640, 640))
-        _app = None
-
-        def get_face_app():
-            global _app
-            if _app is None:
-                from insightface.app import FaceAnalysis
-                _app = FaceAnalysis(name="buffalo_l")
-                _app.prepare(ctx_id=0, det_size=(640,640))
-            return _app
-
+        _app = FaceAnalysis(name="buffalo_l",providers=["CPUExecutionProvider"]  # 🔴 FORZAMOS CPU
+    )
+        _app.prepare(ctx_id=0, det_size=(640, 640))
     return _app
 
 
@@ -50,10 +40,7 @@ def generate_embedding(image_input, from_bytes=False):
 
     app = get_face_app()  # 🔥 AQUÍ se carga el modelo (si aún no existe)
 
-    #faces = app.get(img)
-    app = get_face_app()
     faces = app.get(img)
-
 
     if len(faces) != 1:
         return None
