@@ -19,7 +19,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["localhost","web-production-32181.up.railway.app","https://web-production-32181.up.railway.app"]
+ALLOWED_HOSTS = ["localhost","web-production-32181.up.railway.app","https://web-production-32181.up.railway.app","https://web-production-6cd6c.up.railway.app/"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.up.railway.app",
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'storages',
+    'whitenoise.runserver_nostatic',
 
     'core',
     'accounts',
