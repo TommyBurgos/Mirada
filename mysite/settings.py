@@ -19,7 +19,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["localhost","web-production-32181.up.railway.app","https://web-production-32181.up.railway.app","https://web-production-6cd6c.up.railway.app/"]
+ALLOWED_HOSTS = ["localhost","https://web-production-6cd6c.up.railway.app/","web-production-6cd6c.up.railway.app"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.up.railway.app",
@@ -85,12 +85,21 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
-    )
-}
+print("🔥 DATABASE_URL =", os.getenv("DATABASE_URL"))
+if os.getenv("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            ssl_require=True
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
