@@ -21,17 +21,6 @@ class Employee(models.Model):
 
 from .models import Employee
 
-class EmployeeFace(models.Model):
-    employee = models.ForeignKey(
-        Employee,
-        on_delete=models.CASCADE,
-        related_name='faces'
-    )
-    image = models.ImageField(upload_to='employee_faces/')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Face of {self.employee}"
 
 class EmployeeFace(models.Model):
     employee = models.ForeignKey(
