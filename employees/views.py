@@ -38,6 +38,7 @@ def enroll_face_view(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
     return render(request, 'employees/enroll_face.html', {'employee': employee})
 
+from django.core.files.storage import default_storage
 
 @csrf_exempt
 def upload_face_view(request, employee_id):
@@ -57,13 +58,17 @@ def upload_face_view(request, employee_id):
             return JsonResponse({'error': 'Embedding inválido'}, status=400)
 
         # OJO: luego de .read(), el puntero queda al final -> rebobina para que se guarde bien la imagen
-        image_file.seek(0)
+        image_file.seek(0)        
+
 
         face = EmployeeFace.objects.create(
             employee=employee,
             image=image_file,
             embedding=emb_norm.tolist()
         )
+        #print("🧪 GUARDANDO IMAGEN EN:", face.name)
+        #print("🧪 STORAGE:", face.storage.__class__)
+        print("📦 STORAGE BACKEND:", default_storage.__class__)
 
         return JsonResponse({'status': 'ok', 'face_id': face.id})
 

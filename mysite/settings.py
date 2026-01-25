@@ -5,6 +5,34 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+# 🔐 S3
+DEFAULT_FILE_STORAGE = os.environ.get(
+    "DEFAULT_FILE_STORAGE",
+    "django.core.files.storage.FileSystemStorage"
+)
+
+
+print("🚀 USANDO S3")
+
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+AWS_S3_ENDPOINT_URL = os.environ.get(
+        "AWS_S3_ENDPOINT_URL",
+        f"https://s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    )
+
+AWS_QUERYSTRING_AUTH = False
+AWS_DEFAULT_ACL = None
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
+
+
+
+print("🔥 USE_S3 RAW =", os.environ.get("USE_S3"))
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -173,22 +201,5 @@ MEDIA_URL = '/media/'
 # AWS S3 - MEDIA FILES
 # =========================
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-
-AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "us-east-2")
-
-AWS_S3_ENDPOINT_URL = os.environ.get(
-    "AWS_S3_ENDPOINT_URL",
-    "https://s3.us-east-2.amazonaws.com"
-)
-
-AWS_QUERYSTRING_AUTH = False
-AWS_DEFAULT_ACL = None
-
-MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
 
 #print("🔥 DATABASE_URL =", os.getenv("DATABASE_URL"))
