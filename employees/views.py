@@ -42,7 +42,9 @@ from django.core.files.storage import default_storage
 
 @csrf_exempt
 def upload_face_view(request, employee_id):
+    print("Ingrese a la funcion upload_face_view")
     if request.method == 'POST' and request.FILES.get('image'):
+        print("upload_face_view dentro del post")
 
         employee = get_object_or_404(Employee, id=employee_id)
 
