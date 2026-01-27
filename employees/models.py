@@ -20,6 +20,7 @@ class Employee(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 from .models import Employee
+from employees.utils.file_names import employee_face_upload_path
 
 
 class EmployeeFace(models.Model):
@@ -28,7 +29,7 @@ class EmployeeFace(models.Model):
         on_delete=models.CASCADE,
         related_name='faces'
     )
-    image = models.ImageField(upload_to='employee_faces/')
+    image = models.ImageField(upload_to=employee_face_upload_path)
     embedding = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

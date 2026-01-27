@@ -39,44 +39,88 @@ def enroll_face_view(request, employee_id):
     return render(request, 'employees/enroll_face.html', {'employee': employee})
 
 from django.core.files.storage import default_storage
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @csrf_exempt
 def upload_face_view(request, employee_id):
-    print("Ingrese a la funcion upload_face_view")
-    if request.method == 'POST' and request.FILES.get('image'):
-        print("upload_face_view dentro del post")
+    logger.info("📸 Inicio upload_face_view")
 
+    if request.method != "POST":
+        logger.warning("❌ Método no permitido")
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    if not request.FILES.get("image"):
+        logger.warning("❌ No se recibió imagen")
+        return JsonResponse({"error": "No se recibió imagen"}, status=400)
+
+    try:
+        # 1️⃣ Employee
         employee = get_object_or_404(Employee, id=employee_id)
+        logger.info(f"👤 Employee OK id={employee.id}")
 
-        image_file = request.FILES['image']
+        # 2️⃣ Imagen
+        image_file = request.FILES["image"]
+        logger.info(f"🖼 Imagen recibida: {image_file.name}")
+
         image_bytes = image_file.read()
 
+        # 3️⃣ Embedding
+        logger.info("🧠 Generando embedding…")
         emb = generate_embedding(image_bytes, from_bytes=True)
+
         if emb is None:
-            return JsonResponse({'error': 'No se detectó un rostro válido'}, status=400)
+            logger.warning("❌ No se detectó rostro válido")
+            return JsonResponse(
+                {"error": "No se detectó un rostro válido"},
+                status=400
+            )
 
         emb_norm = l2_normalize(emb)
         if emb_norm is None:
-            return JsonResponse({'error': 'Embedding inválido'}, status=400)
+            logger.warning("❌ Embedding inválido")
+            return JsonResponse(
+                {"error": "Embedding inválido"},
+                status=400
+            )
 
-        # OJO: luego de .read(), el puntero queda al final -> rebobina para que se guarde bien la imagen
-        image_file.seek(0)        
+        logger.info("✅ Embedding generado correctamente")
 
+        # ⚠️ Rebobinar archivo
+        image_file.seek(0)
 
+        # 4️⃣ Guardado DB (sin imagen primero)
+        logger.info("💾 Creando EmployeeFace (DB)…")
         face = EmployeeFace.objects.create(
             employee=employee,
-            image=image_file,
             embedding=emb_norm.tolist()
         )
-        #print("🧪 GUARDANDO IMAGEN EN:", face.name)
-        #print("🧪 STORAGE:", face.storage.__class__)
-        print("📦 STORAGE BACKEND:", default_storage.__class__)
 
-        return JsonResponse({'status': 'ok', 'face_id': face.id})
+        # 5️⃣ Guardado imagen (S3)
+        logger.info(
+            f"☁️ Guardando imagen en storage: {default_storage.__class__}"
+        )
+        face.image = image_file
+        face.save()
 
-    return JsonResponse({'error': 'Solicitud inválida'}, status=400)
 
+        logger.info(f"✅ EmployeeFace creado ID={face.id}")
 
+        return JsonResponse(
+            {"status": "ok", "face_id": face.id}
+        )
+
+    except Exception as e:
+        logger.exception("🔥 Error en upload_face_view")
+        return JsonResponse(
+            {
+                "error": "Error interno",
+                "detail": str(e),
+            },
+            status=500,
+        )
 # Distancia máxima permitida para reconocer (ajustable)
 #RECOGNITION_THRESHOLD = 1.1  
 
