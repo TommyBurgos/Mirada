@@ -51,6 +51,20 @@
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const resultDiv = document.getElementById('result');
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 // 🔹 Control de estado
 let pendingId = null;
@@ -191,7 +205,10 @@ async function confirmAttendance() {
 
     const res = await fetch("/employees/confirm-attendance/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken")
+    },
         body: JSON.stringify({ pending_id: pendingId })
     });
 
