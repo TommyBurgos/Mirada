@@ -46,6 +46,12 @@ logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def upload_face_view(request, employee_id):
+    print("=== upload_face_view ===")
+    print("METHOD:", request.method)
+    print("CONTENT_TYPE:", request.content_type)
+    print("FILES:", request.FILES)
+    print("FILES KEYS:", list(request.FILES.keys()))
+    print("POST:", request.POST)
     logger.info("📸 Inicio upload_face_view")
 
     if request.method != "POST":
