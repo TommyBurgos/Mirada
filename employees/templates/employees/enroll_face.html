@@ -26,26 +26,53 @@ const canvas = document.getElementById('canvas');
 const msg = document.getElementById('msg');
 
 navigator.mediaDevices.getUserMedia({ video: true })
-  .then(stream => video.srcObject = stream);
+  .then(stream => {
+    video.srcObject = stream;
+    video.play();
+  });
 
 function capture() {
+  if (!video.videoWidth || !video.videoHeight) {
+    msg.innerText = '❌ Cámara no lista';
+    return;
+  }
+
+  // 🔥 CLAVE: sincronizar tamaño real
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
   const ctx = canvas.getContext('2d');
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
   canvas.toBlob(blob => {
+    if (!blob) {
+      msg.innerText = '❌ Error capturando imagen';
+      return;
+    }
+
     const formData = new FormData();
     formData.append('image', blob, 'face.jpg');
 
     fetch('{% url "upload_face" employee.id %}', {
       method: 'POST',
-      body: formData
+      body: formData,
     })
     .then(r => r.json())
-    .then(() => msg.innerText = '✔️ Foto guardada')
-    .catch(() => msg.innerText = '❌ Error');
-  }, 'image/jpeg');
+    .then(data => {
+      if (data.error) {
+        msg.innerText = '❌ ' + data.error;
+      } else {
+        msg.innerText = '✔️ Foto guardada';
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      msg.innerText = '❌ Error';
+    });
+  }, 'image/jpeg', 0.9);
 }
 </script>
+
 
 </body>
 </html>
