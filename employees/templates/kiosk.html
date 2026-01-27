@@ -52,16 +52,24 @@ const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const resultDiv = document.getElementById('result');
 
-// 🔹 NUEVO: control de estado
+// 🔹 Control de estado
 let pendingId = null;
 let scanningPaused = false;
+let cameraReady = false;
 
 // Abrir cámara
 navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => {
     video.srcObject = stream;
+    video.play();
+
+    video.onloadedmetadata = () => {
+        cameraReady = true;
+        console.log("📷 Cámara lista:", video.videoWidth, video.videoHeight);
+    };
 })
 .catch(err => {
+    console.error(err);
     resultDiv.innerText = "No se pudo abrir la cámara";
 });
 
@@ -71,15 +79,24 @@ setInterval(() => {
 }, 2000);
 
 function captureAndSend() {
-    // 🔹 NUEVO: pausar escaneo mientras espera confirmación
     if (scanningPaused) return;
+    if (!cameraReady) return;
+    if (!video.videoWidth || !video.videoHeight) return;
 
     const context = canvas.getContext('2d');
+
+    // 🔥 CLAVE: usar tamaño REAL del video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0);
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     canvas.toBlob(blob => {
+        if (!blob) {
+            console.warn("❌ Blob vacío");
+            return;
+        }
+
         const formData = new FormData();
         formData.append('image', blob, 'frame.jpg');
 
@@ -99,47 +116,45 @@ function captureAndSend() {
 
             if (data.recognized === true) {
 
-            // 🛑 NUEVO: caso bloqueado (ya marcó todo hoy)
-            if (data.blocked === true) {
-                resultDiv.innerHTML =
-                    "⚠️ <b>" + data.employee_name + "</b><br>" +
-                    (data.message || "Asistencia ya completada");
-                resultDiv.style.color = "#ffc107";
+                // 🛑 Caso bloqueado (ya marcó todo hoy)
+                if (data.blocked === true) {
+                    resultDiv.innerHTML =
+                        "⚠️ <b>" + data.employee_name + "</b><br>" +
+                        (data.message || "Asistencia ya completada");
+                    resultDiv.style.color = "#ffc107";
 
-                // reanudar escaneo después de un momento
-                setTimeout(() => {
-                    scanningPaused = false;
-                }, 2000);
+                    setTimeout(() => {
+                        scanningPaused = false;
+                    }, 2000);
 
+                    return;
+                }
+
+                // Caso normal (requiere confirmación)
+                resultDiv.innerHTML = "✅ Bienvenido <br><b>" + data.employee_name + "</b>";
+                resultDiv.style.color = "#00e676";
+
+                showConfirmBox(
+                    data.employee_name,
+                    data.suggested_type,
+                    data.pending_id
+                );
                 return;
             }
-
-            // Caso normal (requiere confirmación)
-            resultDiv.innerHTML = "✅ Bienvenido <br><b>" + data.employee_name + "</b>";
-            resultDiv.style.color = "#00e676";
-
-            showConfirmBox(
-                data.employee_name,
-                data.suggested_type,
-                data.pending_id
-            );
-            return;
-        }
-
 
             resultDiv.innerHTML = "❌ " + (data.message || "Rostro no registrado");
             resultDiv.style.color = "#ff5252";
         })
         .catch(err => {
-            console.log("ERROR FETCH:", err);
+            console.error("ERROR FETCH:", err);
             resultDiv.innerText = "Error de conexión";
         });
 
-    }, 'image/jpeg');
+    }, 'image/jpeg', 0.9);
 }
 
 // ================================
-// 🔹 NUEVAS FUNCIONES
+// 🔹 FUNCIONES DE CONFIRMACIÓN
 // ================================
 
 function showConfirmBox(name, type, pid) {
@@ -184,15 +199,13 @@ async function confirmAttendance() {
         }
 
         resultDiv.innerHTML = msg;
+    } else {
+        resultDiv.innerHTML = "❌ Error al registrar asistencia";
+        resultDiv.style.color = "#ff5252";
     }
-    else {
-            resultDiv.innerHTML = "❌ Error al registrar asistencia";
-            resultDiv.style.color = "#ff5252";
-        }
 
     hideConfirmBox();
 
-    // pequeño delay antes de reanudar escaneo
     setTimeout(() => {
         scanningPaused = false;
     }, 1200);
