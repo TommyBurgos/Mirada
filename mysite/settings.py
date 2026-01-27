@@ -142,7 +142,10 @@ WHITENOISE_USE_FINDERS = True
 # =====================================================
 USE_S3 = os.getenv("USE_S3") == "1"
 
+print(f"TENGO USAR AWS? {USE_S3}")
+
 if USE_S3:
+    print("He ingresado al AWS de que si tengo USE S3")
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
