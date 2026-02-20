@@ -439,6 +439,9 @@ def kiosk_activate_device(request):
 
 # Página donde está la cámara
 def kiosk_camera_page(request):
+    if not request.session.get("device_id"):
+        return redirect("/employees/kiosk")  # o la url /employees/kiosk/
+    
     return render(request, "kiosk.html")
 
 def activate_kiosk(request):

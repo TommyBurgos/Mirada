@@ -1,19 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Activar Kiosko</title>
+    <meta charset="UTF-8">
+    <title>Activar Kiosko - Mirada</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+        }
+
+        .kiosk-card {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 18px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            animation: fadeIn 0.6s ease;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #0f172a;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            border: none;
+            background-color: #2563eb;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        #msg {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #dc2626;
+            min-height: 20px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.4);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .kiosk-card {
+                padding: 35px 25px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Ingresar código del dispositivo</h2>
+
+<div class="kiosk-card">
+    <div class="brand">MIRADA</div>
+    <h2>🔐 Activar dispositivo</h2>
 
     <input type="text" id="code" placeholder="Código del kiosko">
-    <button onclick="activate()">Activar</button>
+
+    <button id="activateBtn" onclick="activate()">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">Activar</span>
+    </button>
 
     <p id="msg"></p>
+</div>
 
 <script>
 function activate(){
     const code = document.getElementById("code").value;
+    const btn = document.getElementById("activateBtn");
+    const spinner = document.getElementById("spinner");
+    const btnText = document.getElementById("btnText");
+    const msg = document.getElementById("msg");
+
+    if(!code){
+        msg.innerText = "Ingrese el código del dispositivo";
+        return;
+    }
+
+    // Activar estado loading
+    btn.disabled = true;
+    spinner.style.display = "inline-block";
+    btnText.innerText = "Activando...";
+    msg.innerText = "";
 
     fetch("/employees/activate-kiosk/", {
         method: "POST",
@@ -23,13 +171,22 @@ function activate(){
     .then(r => r.json())
     .then(data => {
         if(data.success){
-            // Redirige al kiosko de cámara
             window.location.href = "/employees/kiosk-camera/";
         } else {
-            document.getElementById("msg").innerText = data.error;
+            btn.disabled = false;
+            spinner.style.display = "none";
+            btnText.innerText = "Activar";
+            msg.innerText = data.message || data.error || "Error al activar";
         }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        spinner.style.display = "none";
+        btnText.innerText = "Activar";
+        msg.innerText = "Error de conexión";
     });
 }
 </script>
+
 </body>
 </html>

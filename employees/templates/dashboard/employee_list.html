@@ -23,7 +23,7 @@
         {% for emp in employees %}
         <tr>
             <td>{{ emp.first_name }} {{ emp.last_name }}</td>
-            <td>{{ emp.document_number|default:"—" }}</td>
+            <td>{{ emp.identification|default:"—" }}</td>
             <td>
                 {% if emp.is_active %}
                     🟢 Activo

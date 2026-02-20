@@ -3,27 +3,147 @@
 {% block title %}Horario de Asistencia{% endblock %}
 
 {% block content %}
-<h2>⏰ Configuración de Horario</h2>
 
-<form method="post">
-    {% csrf_token %}
+<style>
+    .settings-wrapper {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 30px;
+    }
 
-    <div>
-        <label>Hora de entrada</label><br>
-        <input type="time" name="entry_time" value="{{ policy.entry_time }}">
+    .settings-card {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 750px; /* 🔥 más ancho */
+    }
+
+    .settings-header {
+        margin-bottom: 25px;
+    }
+
+    .settings-header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #0f172a;
+    }
+
+    .settings-description {
+        font-size: 14px;
+        color: #64748b;
+        margin-top: 6px;
+    }
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #334155;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 15px;
+        transition: all 0.2s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .info-box {
+        background: #f1f5f9;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 14px;
+        color: #475569;
+        margin-bottom: 25px;
+    }
+
+    .btn-primary {
+        background-color: #2563eb;
+        color: white;
+        padding: 14px 22px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #1d4ed8;
+    }
+
+    .btn-primary:active {
+        transform: scale(0.98);
+    }
+
+    @media (max-width: 768px) {
+        .settings-card {
+            padding: 25px;
+        }
+    }
+</style>
+
+<div class="settings-wrapper">
+    <div class="settings-card">
+
+        <div class="settings-header" style="text-align: center;">
+            <h2>Configuración de Horario</h2>
+            <div class="settings-description">
+                Define el horario oficial de entrada y salida para esta empresa.
+            </div>
+        </div>
+
+        <div class="info-box">
+            El sistema calculará automáticamente: <br>
+            • Estado (a tiempo / tarde) <br>
+            • Minutos de atraso <br>
+            • Bloqueo cuando la asistencia esté completa
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Hora de entrada</label>
+                <input type="time" name="entry_time" value="{{ policy.entry_time }}">
+            </div>
+
+            <div class="form-group">
+                <label>Hora de salida</label>
+                <input type="time" name="exit_time" value="{{ policy.exit_time }}">
+            </div>
+
+            <div class="form-group">
+                <label>Minutos de tolerancia</label>
+                <input type="number" name="grace_minutes" value="{{ policy.grace_minutes }}" min="0">
+            </div>
+
+            <div style="text-align: center;">
+                <button type="submit" class="btn-primary" >
+                Guardar cambios
+                </button>
+            </div>
+            
+        </form>
+
     </div>
+</div>
 
-    <div>
-        <label>Hora de salida</label><br>
-        <input type="time" name="exit_time" value="{{ policy.exit_time }}">
-    </div>
-
-    <div>
-        <label>Minutos de tolerancia</label><br>
-        <input type="number" name="grace_minutes" value="{{ policy.grace_minutes }}" min="0">
-    </div>
-
-    <br>
-    <button type="submit">Guardar cambios</button>
-</form>
 {% endblock %}
