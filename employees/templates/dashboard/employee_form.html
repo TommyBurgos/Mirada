@@ -3,28 +3,145 @@
 {% block title %}Nuevo Empleado{% endblock %}
 
 {% block content %}
-<h2>➕ Nuevo Empleado</h2>
 
-<form method="post">
-    {% csrf_token %}
+<style>
+    .form-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
 
-    <div>
-        <label>Nombres</label><br>
-        <input type="text" name="first_name" required>
+    .form-card {
+        width: 100%;
+        max-width: 650px;
+        background: white;
+        padding: 35px;
+        border-radius: 18px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+    }
+
+    .form-card h2 {
+        margin-bottom: 25px;
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #334155;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 15px;
+        transition: all 0.2s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .form-actions {
+        margin-top: 25px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .btn-primary {
+        background-color: #2563eb;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #1d4ed8;
+    }
+
+    .btn-primary:active {
+        transform: scale(0.98);
+    }
+
+    .btn-secondary {
+        text-decoration: none;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 14px;
+        transition: color 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        color: #0f172a;
+    }
+
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 25px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-secondary {
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="form-wrapper">
+    <div class="form-card">
+        <h2>👤 Nuevo Empleado</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Nombres</label>
+                <input type="text" name="first_name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Apellidos</label>
+                <input type="text" name="last_name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Documento</label>
+                <input type="text" name="document_number">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    💾 Guardar
+                </button>
+
+                <a href="/dashboard/employees/" class="btn-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div>
-        <label>Apellidos</label><br>
-        <input type="text" name="last_name" required>
-    </div>
-
-    <div>
-        <label>Documento</label><br>
-        <input type="text" name="document_number">
-    </div>
-
-    <br>
-    <button type="submit">Guardar</button>
-    <a href="/dashboard/employees/">Cancelar</a>
-</form>
 {% endblock %}

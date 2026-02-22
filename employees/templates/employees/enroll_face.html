@@ -3,22 +3,163 @@
 <head>
 <meta charset="UTF-8">
 <title>Enrolar rostro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-  body { font-family: Arial; text-align: center; }
-  video, canvas { border-radius: 12px; }
-  button { padding: 12px 24px; font-size: 16px; margin-top: 10px; }
+:root{
+    --bg1:#0b1220;
+    --bg2:#0f172a;
+    --card: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.12);
+    --text:#e5e7eb;
+    --muted:#94a3b8;
+    --primary:#2563eb;
+    --success:#00e676;
+    --error:#ff5252;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    min-height:100vh;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg,var(--bg1),var(--bg2));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:30px;
+    color:var(--text);
+}
+
+.enroll-wrapper{
+    width:100%;
+    max-width:900px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:30px;
+    box-shadow:0 25px 70px rgba(0,0,0,.45);
+    backdrop-filter: blur(10px);
+}
+
+.header{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.header h1{
+    font-size:24px;
+    font-weight:800;
+    margin-bottom:6px;
+}
+
+.header span{
+    font-size:14px;
+    color:var(--muted);
+}
+
+.video-container{
+    display:flex;
+    justify-content:center;
+    margin-top:15px;
+}
+
+video{
+    width:100%;
+    max-width:600px;
+    border-radius:18px;
+    border:3px solid rgba(0,230,118,.9);
+    box-shadow:0 0 0 6px rgba(0,230,118,.12), 0 20px 50px rgba(0,0,0,.5);
+    background:#000;
+}
+
+canvas{
+    display:none;
+}
+
+.instructions{
+    text-align:center;
+    font-size:14px;
+    color:var(--muted);
+    margin-top:15px;
+}
+
+button{
+    margin-top:20px;
+    padding:14px 28px;
+    font-size:16px;
+    font-weight:700;
+    border-radius:14px;
+    border:none;
+    cursor:pointer;
+    background:var(--primary);
+    color:white;
+    transition:all .2s ease;
+    box-shadow:0 10px 25px rgba(37,99,235,.35);
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+button:active{
+    transform:scale(.97);
+}
+
+#msg{
+    margin-top:15px;
+    font-size:16px;
+    min-height:24px;
+    font-weight:600;
+}
+
+.success{
+    color:var(--success);
+}
+
+.error{
+    color:var(--error);
+}
+
+@media (max-width:700px){
+    .enroll-wrapper{
+        padding:20px;
+    }
+    video{
+        max-width:100%;
+    }
+}
 </style>
 </head>
+
 <body>
 
-<h1>Enrolar rostro: {{ employee.first_name }} {{ employee.last_name }}</h1>
+<div class="enroll-wrapper">
 
-<video id="video" width="400" height="300" autoplay></video>
-<canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+    <div class="header">
+        <h1>📸 Enrolar rostro</h1>
+        <span>{{ employee.first_name }} {{ employee.last_name }}</span>
+    </div>
 
-<br>
-<button onclick="capture()">📸 Capturar</button>
-<p id="msg"></p>
+    <div class="video-container">
+        <video id="video" width="400" height="300" autoplay></video>
+        <canvas id="canvas" width="400" height="300"></canvas>
+    </div>
+
+    <div class="instructions">
+        Coloca el rostro centrado y con buena iluminación antes de capturar.
+    </div>
+
+    <div style="text-align:center;">
+        <button onclick="capture()">Capturar rostro</button>
+        <p id="msg"></p>
+    </div>
+
+</div>
 
 <script>
 const video = document.getElementById('video');
@@ -34,10 +175,10 @@ navigator.mediaDevices.getUserMedia({ video: true })
 function capture() {
   if (!video.videoWidth || !video.videoHeight) {
     msg.innerText = '❌ Cámara no lista';
+    msg.className = "error";
     return;
   }
 
-  // 🔥 CLAVE: sincronizar tamaño real
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
 
@@ -47,6 +188,7 @@ function capture() {
   canvas.toBlob(blob => {
     if (!blob) {
       msg.innerText = '❌ Error capturando imagen';
+      msg.className = "error";
       return;
     }
 
@@ -61,18 +203,20 @@ function capture() {
     .then(data => {
       if (data.error) {
         msg.innerText = '❌ ' + data.error;
+        msg.className = "error";
       } else {
-        msg.innerText = '✔️ Foto guardada';
+        msg.innerText = '✔️ Foto guardada correctamente';
+        msg.className = "success";
       }
     })
     .catch(err => {
       console.error(err);
       msg.innerText = '❌ Error';
+      msg.className = "error";
     });
   }, 'image/jpeg', 0.9);
 }
 </script>
-
 
 </body>
 </html>

@@ -180,7 +180,10 @@ def recognize_face_view(request):
 
         # ⛔ Por ahora déjalo así para no romper reconocimiento.
         # Luego (cuando confirmemos tu modelo multiempresa) lo filtramos por company.
-        faces_qs = EmployeeFace.objects.exclude(embedding__isnull=True)
+        faces_qs = EmployeeFace.objects.filter(
+            employee__company=device.company,
+            embedding__isnull=False
+        )
 
         for face in faces_qs:
             db = l2_normalize(face.embedding)
