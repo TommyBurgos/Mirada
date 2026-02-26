@@ -29,6 +29,10 @@ CSRF_TRUSTED_ORIGINS = [
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
+CORS_ALLOWED_ORIGINS = [
+    "https://identiface.vercel.app",
+]
+
 # =====================================================
 # APPLICATIONS
 # =====================================================
@@ -44,12 +48,15 @@ INSTALLED_APPS = [
     "rest_framework",
     "storages",
     "whitenoise.runserver_nostatic",
+    "corsheaders",
+
 
     # Local apps
     "core",
     "accounts",
     "employees",
     "attendance",
+    "leads",
 ]
 
 # =====================================================
@@ -58,6 +65,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

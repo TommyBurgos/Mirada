@@ -530,3 +530,4 @@ def device_create_view(request):
             return redirect("/employees/dashboard/devices/")
 
     return render(request, "dashboard/device_form.html")
+
