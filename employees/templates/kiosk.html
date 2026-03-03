@@ -253,6 +253,14 @@
             button{ width: 100%; }
         }
     </style>
+    {% load static %}
+
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#0f172a">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/icon-180.png' %}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="IdentiFace">
 </head>
 
 <body>
@@ -494,6 +502,13 @@ function cancelAttendance() {
 
 document.getElementById("btnConfirm").addEventListener("click", confirmAttendance);
 document.getElementById("btnCancel").addEventListener("click", cancelAttendance);
+</script>
+<!--Para el logo en acceso directo-->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("{% static 'sw.js' %}")
+    .then(() => console.log("Service Worker registrado"));
+}
 </script>
 
 </body>
